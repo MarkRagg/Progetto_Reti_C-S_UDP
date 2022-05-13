@@ -26,6 +26,11 @@ try:
     while True:
         # Get command in input and send it to the server
         message = input("Write a command: ")
+
+        if message == 'Exit':
+            print('exit from server..')
+            break
+            
         sent = sock.sendto(message.encode(), server_address)
         print("Message inviated")
 
@@ -33,7 +38,7 @@ try:
         print("Waiting a response")
         data, server = data, server = sock.recvfrom(4096)
         response = data.decode('utf8')
-        print ('received message "%s"' % response)
+        print ('Server message: "%s"' % response)
 
 except Exception as info:
     print(info)
