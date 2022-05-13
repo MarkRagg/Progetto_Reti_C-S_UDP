@@ -4,62 +4,93 @@ Dilaver Shtini
 '''
 
 import socket as sk
-#per gestire i file
 import os
 import time
 
-# Creo il socket
+#path to get files
+path = os.getcwd()+"\\file"
+
+resp = ""
+
+
+def download(file_name, address):
+
+    # open the file that client want
+    f = open(path+"\\"+file_name, "rb")
+    data = f.read(4096)
+    
+    # start send packet
+    while(data):
+        if(sock.sendto(data.encode(), address)):
+            data = f.read(4096)
+            time.sleep(0.02) # give receiver a bit time to save
+
+    f.close()
+
+def isValid(file):
+    if file in os.listdir(path):
+        return;
+    else:
+        msg = "File doesn't exist"
+        return msg
+
+# create the socket
 sock = sk.socket(sk.AF_INET, sk.SOCK_DGRAM)
 
-# associo il socket alla porta
+# bind the socket to the port
 server_address = ('localhost', 10000)
 print ('\n\r Starting up on %s port %s' % server_address)
 sock.bind(server_address)
 
-#specifico il percorso dove prendo i file da visualizzare
-path = os.getcwd()+"\\file"
 
 while True:
     print('\n\r Waiting to connect...')
     data, address = sock.recvfrom(4096) 
+    resp = data.decode('utf8')
     
     if data:
-        menu = '\r\nBenvenuto sul server\r\n\r\nOpzioni Disponibili\r\n\r\n1. Visualizzazione dei file dispoinibli\r\n2. Download file\r\n3. Upload file\r\n4. Esci\r\n'         
+        menu = '\r\nBenvenuto sul server\r\n\r\nOpzioni Disponibili\r\n\r\nList. Visualizzazione dei file disponibli\r\nGet. Download file\r\nPut. Upload file\r\n4. Esci\r\n'         
         time.sleep(2)
         sent = sock.sendto(menu.encode(), address)
-        #print ('Sent menu back to %s' % (address))
 
         while True:
             choice, address = sock.recvfrom(1024)
-            
-            print('dentro while, choice -> "%s"' % choice.decode())
-            
-            # visualizza i file presenti sul server
-            if choice.decode() == '1':
-                print('Visualizzazione file:\n')
-                data = str( os.listdir(path) )
-                time.sleep(4)
-                #for file in data:
-                    #print(file)
+            resp = choice.decode('utf8')
+                        
+            # views file
+            if resp == 'list':
+                print('Views files:\n')
+                data = str( os.listdir(path) )   
+                time.sleep(2)
+                print(data)
                 
-                # download di un file sul server
-            elif choice.decode() == '2':
-                print('Download file:\n')
+                # download file
+            elif resp[0:3] == 'get':
+                filename = resp[4:len(resp)]   
+                print('Download file: %s \n' % filename)   
+                download(filename, address)                
                 
-                # upload di un file sul server
+                # upload file
             elif choice.decode() == '3':
                 print('Upload file:\n')
-            
-                # eseguo la funzione di Exit
-            elif choice.decode() == '4':
-                print('Exit\n')
-                data = "Exit"
-                sock.sendto(data.encode(), address);
-                break;
+
             else:
                 data = menu
-                    # restituisce le opzioni del menù al client
+                # return menu to client
             sock.sendto(data.encode(), address);
-        # chiude la connessione
+        # close connection
         sock.close()
         break;
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
