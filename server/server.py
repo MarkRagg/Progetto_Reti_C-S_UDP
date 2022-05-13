@@ -68,6 +68,11 @@ while True:
             elif resp[0:3] == 'get':
                 filename = resp[4:len(resp)]   
                 print('Download file: %s \n' % filename)   
+                ctr = isValid(filename)
+                if ctr == "File doesn't exist":
+                    data = "File doesn't exist"
+                    sock.sendto(data.encode(), address);
+                    continue
                 download(filename, address)                
                 
                 # upload file
