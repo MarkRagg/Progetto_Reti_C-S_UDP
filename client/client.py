@@ -1,5 +1,6 @@
 import socket as sk
 import time
+import os
 
 
 # Create socket UDP
@@ -8,6 +9,10 @@ sock = sk.socket(sk.AF_INET, sk.SOCK_DGRAM)
 server_address = ('localhost', 10000)
 message = "I'm a user"
 response = ""
+# Get path for directory 
+upload_path = os.getcwd()+"\\ToUpload\\"
+download_path = os.getcwd()+"\\Download"
+
 
 try:
     # send message to server
@@ -30,13 +35,40 @@ try:
         if message == 'Exit':
             print('exit from server..')
             break
+        
+        # Implementation of command put filename
+        elif message[0:3] == 'put':
+            # Send a message to the server with command put
+            sock.sendto(message.encode(), server_address)
+
+            # Waiting server response
+            data, server = sock.recvfrom(4096)
+            response = data.decode('utf8')
+
+            # If server response with ok client is allowed to send the file
+            if response == "ok":
+                filename = upload_path + message[4:len(message)]
+                filesize = os.path.getsize(filename)
+                print(filename)
+                with open(filename, "rb") as packet:
+                    while True:
+                        # Read bytes from the file
+                        bytes_read = packet.read(filesize)
+                        # If bytes_read not read any bytes file transfer is finished
+                        if not bytes_read:
+                            break
+                        # Send a packet
+                        sock.sendto(bytes_read, server_address)
+            else:
+                break
+            break
             
         sent = sock.sendto(message.encode(), server_address)
         print("Message inviated")
 
         # Wait again a server message
         print("Waiting a response")
-        data, server = data, server = sock.recvfrom(4096)
+        data, server = sock.recvfrom(4096)
         response = data.decode('utf8')
         print ('Server message: "%s"' % response)
 
