@@ -2,6 +2,20 @@ import socket as sk
 import time
 import os
 
+# Upload function
+def __upload__(filename, address):
+    filesize = os.path.getsize(filename)
+    print(filename)
+    packet = open(filename, "rb")
+    while True:
+        # Read bytes from the file
+        bytes_read = packet.read(filesize)
+        # If bytes_read not read any bytes file transfer is finished
+        if not bytes_read:
+            packet.close()
+            break
+        # Send a packet
+        sock.sendto(bytes_read, address)
 
 # Create socket UDP
 sock = sk.socket(sk.AF_INET, sk.SOCK_DGRAM)
@@ -48,17 +62,7 @@ try:
             # If server response with ok client is allowed to send the file
             if response == "ok":
                 filename = upload_path + message[4:len(message)]
-                filesize = os.path.getsize(filename)
-                print(filename)
-                with open(filename, "rb") as packet:
-                    while True:
-                        # Read bytes from the file
-                        bytes_read = packet.read(filesize)
-                        # If bytes_read not read any bytes file transfer is finished
-                        if not bytes_read:
-                            break
-                        # Send a packet
-                        sock.sendto(bytes_read, server_address)
+                __upload__(filename, server_address)
             else:
                 break
             break
