@@ -18,11 +18,11 @@ def download(file_name, address):
     # open the file that client want
     file_path = path+"\\"+file_name
     f = open(file_path, "rb")
-    data = f.read(4096)
+    data = f.read(1024)
     
     # start send packet
     while(data):
-        if(sock.sendto(data.encode(), address)):
+        if(sock.sendto(data, address)):
             data = f.read(4096)
             time.sleep(0.02) # give receiver a bit time to save
     f.close()
@@ -67,7 +67,7 @@ while True:
     resp = data.decode('utf8')
     
     if data:
-        menu = '\r\nBenvenuto sul server\r\n\r\nOpzioni Disponibili\r\n\r\nList. Visualizzazione dei file disponibli\r\nGet. Download file\r\nPut. Upload file\r\n4. Esci\r\n'         
+        menu = '\r\nWelcome to the server\r\n\rAvailable options:\r\n\r\nList -> View available files\r\nGet -> Download file\r\nPut -> Upload file\r\nExit -> exit\r\n'         
         time.sleep(2)
         sent = sock.sendto(menu.encode(), address)
 
@@ -92,6 +92,8 @@ while True:
                     sock.sendto(data.encode(), address);
                     continue
                 print('\nDownload file: %s ' % filename)   
+                data = "ok"
+                sock.sendto(data.encode(), address)
                 download(filename, address)    
                 time.sleep(2)
                 sock.sendto(data.encode(), address);
