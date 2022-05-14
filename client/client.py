@@ -11,7 +11,7 @@ message = "I'm a user"
 response = ""
 # Get path for directory 
 upload_path = os.getcwd()+"\\ToUpload\\"
-download_path = os.getcwd()+"\\Download"
+download_path = os.getcwd()+"\\Download\\"
 
 
 try:
@@ -53,7 +53,24 @@ try:
                 break
             
             break
+        
+        elif message[0:3] == 'get':
+            # Send a message to the server with command put
+            sock.sendto(message.encode(), server_address)
+
+            # Waiting server response
+            data, server = sock.recvfrom(4096)
+            response = data.decode('utf8')
+            # If server response with ok client is allowed to send the file
+            if response == "ok":
+                filename = download_path + message[4:len(message)]
+                print("Start Donwloading..")
+                client_utils.__download__(sock, filename, server_address)
+            else:
+                break
             
+            break
+
         sent = sock.sendto(message.encode(), server_address)
         print("Message inviated")
 

@@ -5,7 +5,7 @@ import os
 def __upload__(sock, filename, address):
     filesize = os.path.getsize(filename)
     print(filename)
-    packet = open(filename, "rb")
+    packet = open(filename, 'rb')
     while True:
         # Read bytes from the file
         bytes_read = packet.read(filesize)
@@ -18,4 +18,14 @@ def __upload__(sock, filename, address):
 
 
 def __download__(sock, filename, address):
-    sock.recvfrom(4096)
+    filesize = os.path.getsize(filename)
+    print(filename)
+    # Create a new file 
+    packet = open(filename, 'w')
+    # Receive packet from server and write to the file
+    data, address = sock.recvfrom(4096)
+    packet.write(data.decode('utf8'))
+    packet.close()
+    # Send a packet
+    print("Finished!")
+
