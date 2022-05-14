@@ -12,11 +12,12 @@ path = os.getcwd()+"\\file"
 
 resp = ""
 
-
+# Download files from server to client
 def download(file_name, address):
 
     # open the file that client want
-    f = open(path+"\\"+file_name, "rb")
+    file_path = path+"\\"+file_name
+    f = open(file_path, "rb")
     data = f.read(4096)
     
     # start send packet
@@ -24,7 +25,24 @@ def download(file_name, address):
         if(sock.sendto(data.encode(), address)):
             data = f.read(4096)
             time.sleep(0.02) # give receiver a bit time to save
+    f.close()
+    
+# Upload files from client to server
+def upload(file_name):    
+    while True:
+        data, addr = sock.recvfrom(4096)
+        if data:
+            print ("File name: %s" % file_name)
+            file_msg = data.strip()
 
+        # create the new file on the server without content
+        new_path = path+"\\"+file_name
+        f = open(new_path, 'wb')
+
+        # populate the file
+        f.write(file_msg)
+        print ("%s finish!" % file_name)
+        break
     f.close()
 
 def isValid(file):
@@ -58,44 +76,42 @@ while True:
             resp = choice.decode('utf8')
                         
             # views file
-            if resp == 'list':
-                print('Views files:\n')
+            if resp.lower() == 'list':
+                print('\nViews files:')
                 data = str( os.listdir(path) )   
                 time.sleep(2)
                 print(data)
+                sock.sendto(data.encode(), address);
                 
-                # download file
-            elif resp[0:3] == 'get':
+            # download file
+            elif resp[0:3].lower() == 'get':
                 filename = resp[4:len(resp)]   
-                print('Download file: %s \n' % filename)   
                 ctr = isValid(filename)
                 if ctr == "File doesn't exist":
                     data = "File doesn't exist"
                     sock.sendto(data.encode(), address);
                     continue
-                download(filename, address)                
+                print('\nDownload file: %s ' % filename)   
+                download(filename, address)    
+                time.sleep(2)
+                sock.sendto(data.encode(), address);
                 
-                # upload file
-            elif choice.decode() == '3':
-                print('Upload file:\n')
+            # upload file
+            elif resp[0:3].lower() == 'put':
+                filename = resp[4:len(resp)]
+                print('\nUpload file:')
+                data = "ok"
+                sock.sendto(data.encode(), address)
+                upload(filename)
+                time.sleep(2)
 
             else:
+                #return the menu to the client
                 data = menu
-                # return menu to client
-            sock.sendto(data.encode(), address);
+                sock.sendto(data.encode(), address);
+                
         # close connection
         sock.close()
         break;
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-
-
+        
+        
