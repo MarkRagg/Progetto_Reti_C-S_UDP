@@ -18,8 +18,6 @@ def __upload__(sock, filename, address):
 
 
 def __download__(sock, filename, address):
-    filesize = os.path.getsize(filename)
-    print(filename)
     # Create a new file 
     packet = open(filename, 'w')
     # Receive packet from server and write to the file
