@@ -16,8 +16,7 @@ download_path = os.getcwd()+"\\Download\\"
 
 try:
     # send message to server
-    print ('sending "%s"' % message)
-    time.sleep(2)
+    print ('sending %s' % message)
     sent = sock.sendto(message.encode(), server_address)
 
     # Wait server receive
@@ -25,14 +24,13 @@ try:
     data, server = sock.recvfrom(4096)
     response = data.decode('utf8')
     # Print server info
-    time.sleep(2)
-    print ('received message "%s"' % response)
+    print ('Server message: %s' % response)
 
     while True:
         # Get command in input and send it to the server
         message = input("Write a command: ")
 
-        if message == 'Exit':
+        if message == 'exit':
             print('exit from server..')
             break
         
@@ -72,13 +70,14 @@ try:
             break
 
         sent = sock.sendto(message.encode(), server_address)
+        print("")
         print("Message inviated")
 
         # Wait again a server message
-        print("Waiting a response")
+        print("Waiting a response\n")
         data, server = sock.recvfrom(4096)
         response = data.decode('utf8')
-        print ('Server message: "%s"' % response)
+        print ('Server message: %s' % response)
 
 except Exception as info:
     print(info)
