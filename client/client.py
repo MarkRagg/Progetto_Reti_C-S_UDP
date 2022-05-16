@@ -2,9 +2,11 @@ import socket as sk
 import time
 import os
 import client_utils
+import threading
 
 # Create socket UDP
 sock = sk.socket(sk.AF_INET, sk.SOCK_DGRAM)
+sock.settimeout(2)
 
 server_address = ('localhost', 10000)
 message = "I'm a user"
@@ -43,6 +45,7 @@ try:
             data, server = sock.recvfrom(4096)
             response = data.decode('utf8')
 
+
             # If server response with ok client is allowed to send the file
             if response == "ok":
                 filename = upload_path + message[4:len(message)]
@@ -80,4 +83,4 @@ try:
         print ('Server message: %s' % response)
 
 except Exception as info:
-    print(info)
+    sock.sendto(message, server_address)
