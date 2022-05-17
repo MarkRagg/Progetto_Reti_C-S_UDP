@@ -36,24 +36,24 @@ def __upload__(sock, filename, address):
             sock.sendto(message.encode(), address)
             # Catch server response
             response, addr = sock.recvfrom(4096)
-            print(response.decode())
         except sk.error:
             sock.sendto(message.encode(), address)
             
-        print(response.decode())
         if response.decode() == 'Header arrived':
             break
 
     # Start uploading 
     print('Uploading..')
     for packet in file_packets :
+        print("Invio pacchetto n. %s" % packet.packet_number)
         a = pickle.dumps(packet)
         sock.sendto(a, address) 
     
     while True:
         # It manage server ACK for upload ending
         try:
-            response = sock.recvfrom(4096)
+            response, addr = sock.recvfrom(4096)
+            response = response.decode()
             # code 200 : Upload Succesful
             if response == '200':
                 print('Upload finished')
@@ -63,11 +63,9 @@ def __upload__(sock, filename, address):
                 for packet in file_packets :
                     sock.sendto(pickle.dumps(packet), address) # It might throw exceptions
             else:
-                print("sium")
                 print('Upload failed')
                 return
         except sk.error:
-            print("non funge")
             print('Upload failed')
             return
 

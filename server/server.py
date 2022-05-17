@@ -10,6 +10,10 @@ import pickle
 from packet import Packet
 import hashlib
 
+
+PACKET_SIZE_UPLOAD = 32768
+PACKET_SIZE_DOWNLOAD = 65536
+
 #path to get files
 path = os.getcwd()+"\\file"
 
@@ -40,7 +44,7 @@ def download(file_name, address):
 def upload(file_name):    
     
     # set timeout for receive packet from client
-    sock.settimeout(2)
+    #sock.settimeout(2)
 
     while True:
         data, addr = sock.recvfrom(4096)
@@ -66,11 +70,12 @@ def upload(file_name):
        
         while i < int(n_packet.decode()):
             try:
-                data, addr = sock.recvfrom(4096)    
-                print(data.encode())
+                data, addr = sock.recvfrom(PACKET_SIZE_DOWNLOAD)    
                 data_enc  = pickle.loads(data)
-                checksum = hashlib.md5(data_enc).digest()
+                print(data_enc.packet_number)
+                checksum = hashlib.md5(data_enc.body).digest()
                 if checksum != data_enc.checksum:
+                    print("Checksum error")
                     i = 0
                     msg = "111"      
                     packets.clear()
@@ -78,6 +83,7 @@ def upload(file_name):
                     continue 
                 i = i+1
                 # add the data received from client to the list
+                print("Inserisco in lista")
                 packets.append(data_enc)
             except Exception as error:
                 print(error)
@@ -85,15 +91,16 @@ def upload(file_name):
                 msg = "111"      # 111 : something going wrong
                 packets.clear()
                 sock.sendto(msg.encode(), addr)
-            
+
         # 200 : all packet arriver
-        if len(packets) == n_packet:
+        if len(packets) == int(n_packet.decode()):
             msg = "200"
-            sock.sendto(msg, addr)
-            f.write(packets)
+            sock.sendto(msg.encode(), addr)
+            packets.sort(key=lambda x: x.packet_number)
+            for packet in packets :     
+                f.write(packet.body)
             print ("%s finish!" % file_name)
             break             
-        
     f.close()
 
 def isValid(file):

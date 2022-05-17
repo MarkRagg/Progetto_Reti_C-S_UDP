@@ -32,28 +32,28 @@ try:
         # Get command in input and send it to the server
         message = input("Write a command: ")
 
+        sent = sock.sendto(message.encode(), server_address)
+        print("")
+        print("Message inviated")
+
+        # Wait again a server message
+        print("Waiting a response\n")
+        data, server = sock.recvfrom(4096)
+        response = data.decode('utf8')
+        print ('Server message: %s' % response)
+
         if message == 'exit':
             print('exit from server..')
             break
         
         # Implementation of command put filename
         elif message[0:3] == 'put':
-            # Send a message to the server with command put
-            sock.sendto(message.encode(), server_address)
-
-            # Waiting server response
-            data, server = sock.recvfrom(4096)
-            response = data.decode('utf8')
-
-
             # If server response with ok client is allowed to send the file
             if response == "ok":
                 filename = upload_path + message[4:len(message)]
                 client_utils.__upload__(sock, filename, server_address)
             else:
                 break
-            
-            break
         
         elif message[0:3] == 'get':
             # Send a message to the server with command put
@@ -70,17 +70,8 @@ try:
             else:
                 break
             
-            break
 
-        sent = sock.sendto(message.encode(), server_address)
-        print("")
-        print("Message inviated")
-
-        # Wait again a server message
-        print("Waiting a response\n")
-        data, server = sock.recvfrom(4096)
-        response = data.decode('utf8')
-        print ('Server message: %s' % response)
+        
 
 except Exception as info:
     sock.sendto(message.encode(), server_address)
