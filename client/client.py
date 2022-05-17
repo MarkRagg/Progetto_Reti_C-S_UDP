@@ -1,8 +1,6 @@
 import socket as sk
-import time
 import os
 import client_utils
-import threading
 
 # Create socket UDP
 sock = sk.socket(sk.AF_INET, sk.SOCK_DGRAM)
@@ -56,16 +54,10 @@ try:
                 break
         
         elif message[0:3] == 'get':
-            # Send a message to the server with command put
-            sock.sendto(message.encode(), server_address)
-
-            # Waiting server response
-            data, server = sock.recvfrom(4096)
-            response = data.decode('utf8')
-            # If server response with ok client is allowed to send the file
+           # If server response with ok client is allowed to get the file
             if response == "ok":
                 filename = download_path + message[4:len(message)]
-                print("Start Donwloading..")
+                print("Start Downloading..")
                 client_utils.__download__(sock, filename, server_address)
             else:
                 break
@@ -74,4 +66,5 @@ try:
         
 
 except Exception as info:
+    print(info)
     sock.sendto(message.encode(), server_address)
