@@ -22,7 +22,7 @@ def __upload__(sock, filename, address):
             file.close()
             break
         chunk = Packet(i, packet_body)
-        # Insertion of packets in the list 
+        # Insertion of packets in the list
         file_packets.append(chunk)
         i = i + 1
 
@@ -35,8 +35,8 @@ def __upload__(sock, filename, address):
         try: 
             sock.sendto(message.encode(), address)
             # Catch server response
-            response = sock.recvfrom(4096)
-        except Exception as info:
+            response = sock.recvfrom(4096).decode()
+        except Exception:
             sock.sendto(message, address)
 
         if response == 'Header arrived':
@@ -46,8 +46,25 @@ def __upload__(sock, filename, address):
     print('Uploading..')
     for packet in file_packets :
         sock.sendto(pickle.dumps(packet), address) # It might throw exceptions
-        print("funziona")
-        response = sock.recvfrom(4096)
+    
+    while True:
+        # It manage server ACK for upload ending
+        try:
+            response = sock.recvfrom(4096).decode()
+            # code 200 : Upload Succesful
+            if response == '200':
+                print('Upload finished')
+                return 
+            # code 111 : server ask packets again
+            elif response == '111':
+                for packet in file_packets :
+                    sock.sendto(pickle.dumps(packet), address) # It might throw exceptions
+            else:
+                print('Upload failed')
+                return
+        except Exception:
+            print('Upload failed')
+            return
 
 
 def __download__(sock, filename, address):
