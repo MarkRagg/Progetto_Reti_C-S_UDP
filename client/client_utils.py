@@ -28,7 +28,7 @@ def __upload__(sock, filename, address):
 
     # Make the header message
     num_packets = len(file_packets)
-    message = '{num_packets}'
+    message = '%s'% num_packets
 
     # Send header file
     while True:
@@ -37,7 +37,7 @@ def __upload__(sock, filename, address):
             # Catch server response
             response = sock.recvfrom(4096).decode()
         except Exception:
-            sock.sendto(message, address)
+            sock.sendto(message.encode(), address)
 
         if response == 'Header arrived':
             break
@@ -45,7 +45,7 @@ def __upload__(sock, filename, address):
     # Start uploading 
     print('Uploading..')
     for packet in file_packets :
-        sock.sendto(pickle.dumps(packet), address) # It might throw exceptions
+        sock.sendto(pickle.dumps(packet), address) 
     
     while True:
         # It manage server ACK for upload ending

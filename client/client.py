@@ -83,4 +83,4 @@ try:
         print ('Server message: %s' % response)
 
 except Exception as info:
-    sock.sendto(message, server_address)
+    sock.sendto(message.encode(), server_address)
