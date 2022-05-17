@@ -39,6 +39,8 @@ def upload(file_name):
         new_path = path+"\\"+file_name
         f = open(new_path, 'wb')
 
+        # prendo il primo elemento che mi dice quanti pacchetti mi deve spedire il client
+        n_packet = file_msg[0]
         # populate the file
         f.write(file_msg)
         print ("%s finish!" % file_name)
@@ -68,7 +70,6 @@ while True:
     
     if data:
         menu = '\r\nWelcome to the server\r\n\rAvailable options:\r\n\r\nList -> View available files\r\nGet -> Download file\r\nPut -> Upload file\r\nExit -> exit\r\n'         
-        time.sleep(2)
         sent = sock.sendto(menu.encode(), address)
 
         while True:
@@ -79,7 +80,6 @@ while True:
             if resp.lower() == 'list':
                 print('\nViews files:')
                 data = str( os.listdir(path) )   
-                time.sleep(2)
                 print(data)
                 sock.sendto(data.encode(), address);
                 
@@ -95,7 +95,6 @@ while True:
                 data = "ok"
                 sock.sendto(data.encode(), address)
                 download(filename, address)    
-                time.sleep(2)
                 sock.sendto(data.encode(), address);
                 
             # upload file
@@ -105,7 +104,6 @@ while True:
                 data = "ok"
                 sock.sendto(data.encode(), address)
                 upload(filename)
-                time.sleep(2)
 
             else:
                 #return the menu to the client
