@@ -178,7 +178,7 @@ try:
                 elif resp[0:3].lower() == 'get':
                     filename = resp[4:len(resp)]   
                     ctr = isValid(filename)
-                    if ctr != "File doesn't exist":
+                    if ctr == "File doesn't exist":
                         data = "File doesn't exist"
                         sock.sendto(data.encode(), address);
                         continue
