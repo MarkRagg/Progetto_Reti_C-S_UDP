@@ -5,7 +5,7 @@ Dilaver Shtini
 
 import socket as sk
 import os
-#import time
+import time
 import pickle
 from packet import Packet
 import hashlib
@@ -21,6 +21,7 @@ resp = ""
 
 # create the socket
 sock = sk.socket(sk.AF_INET, sk.SOCK_DGRAM)
+
 
 # Download files from server to client
 def download(file_name, address):
@@ -59,8 +60,9 @@ def download(file_name, address):
     print('Downloading...')
     for packet in file_packets :
         print("Send packet n. %s" % packet.packet_number)
+        time.sleep(0.0001)
         a = pickle.dumps(packet)
-        sock.sendto(a, address) 
+        sock.sendto(a, addr) 
     
     while True:
         try:
@@ -73,7 +75,8 @@ def download(file_name, address):
             # code 111 : client ask packets again
             elif response == '111':
                 for packet in file_packets :
-                    sock.sendto(pickle.dumps(packet), address) # It might throw exceptions
+                    a = pickle.dumps(packet)
+                    sock.sendto(a, addr) # It might throw exceptions
             else:
                 print('Download failed')
                 return
@@ -110,6 +113,8 @@ def upload(file_name):
             try:
                 data, addr = sock.recvfrom(PACKET_SIZE_DOWNLOAD)    
                 data_enc  = pickle.loads(data)
+                print(data_enc.packet_number)
+
                 checksum = hashlib.md5(data_enc.body).digest()
                 if checksum != data_enc.checksum:
                     print("Checksum error")

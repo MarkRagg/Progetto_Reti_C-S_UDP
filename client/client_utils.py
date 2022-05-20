@@ -69,13 +69,13 @@ def __upload__(sock, filename, address):
             print('Upload failed')
             return
 
-
 def __download__(sock, filename, address):
+    sock.settimeout(2)
     while True:
         data, addr = sock.recvfrom(4096)
-        if data:
-            print ("File name: %s" % filename)
-            file_msg = data
+        #if data:
+        print ("File name: %s" % filename)
+        file_msg = data
 
         f = open(filename, 'wb')
 
