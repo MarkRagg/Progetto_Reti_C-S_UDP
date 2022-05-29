@@ -1,8 +1,3 @@
-'''
-                            UDP SERVER SOCKET
-Dilaver Shtini
-'''
-
 import socket as sk
 import os
 import time
@@ -10,18 +5,15 @@ import pickle
 from packet import Packet
 import hashlib
 
-
 PACKET_SIZE_UPLOAD = 32768
 PACKET_SIZE_DOWNLOAD = 65536
 
 #path to get files
 path = os.getcwd()+"\\file"
-
 resp = ""
 
 # create the socket
 sock = sk.socket(sk.AF_INET, sk.SOCK_DGRAM)
-
 
 # Download files from server to client
 def download(file_name, address):
@@ -63,7 +55,7 @@ def download(file_name, address):
         time.sleep(0.0001)
         a = pickle.dumps(packet)
         sock.sendto(a, addr) 
-    
+    sock.settimeout(5)
     while True:
         try:
             response, addr = sock.recvfrom(4096)
@@ -71,17 +63,20 @@ def download(file_name, address):
             # code 200 : Download Successful
             if response == '200':
                 print('Download finished')
+                sock.settimeout(None)
                 return 
             # code 111 : client ask packets again
             elif response == '111':
                 for packet in file_packets :
-                    a = pickle.dumps(packet)
-                    sock.sendto(a, addr) # It might throw exceptions
+                    print("send packet again %s" % packet.packet_number) 
+                    sock.sendto(pickle.dumps(packet), addr)
             else:
                 print('Download failed')
+                sock.settimeout(None)
                 return
         except sk.error:
-            print('Download failed')
+            print('Download failed with exception')
+            sock.settimeout(None)
             return
     
 # Upload files from client to server
@@ -103,7 +98,6 @@ def upload(file_name):
         x = "Header arrived"
         sock.sendto(x.encode(), addr)
         
-        # now i can receive the data from the client
         i = 0
         
         # list for all packets received from client
@@ -145,6 +139,7 @@ def upload(file_name):
             break             
     f.close()
 
+# check if the file exists
 def isValid(file):
     if file in os.listdir(path):
         return;
@@ -190,7 +185,7 @@ try:
                     print('\nDownload file: %s ' % filename)   
                     data = "ok"
                     sock.sendto(data.encode(), address)
-                    download(filename, address)    
+                    download(filename, address)
                     
                 # upload file
                 elif resp[0:3].lower() == 'put':

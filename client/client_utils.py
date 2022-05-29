@@ -70,10 +70,8 @@ def __upload__(sock, filename, address):
             return
 
 def __download__(sock, filename, address):
-    sock.settimeout(2)
     while True:
         data, addr = sock.recvfrom(4096)
-        #if data:
         print ("File name: %s" % filename)
         file_msg = data
 
@@ -85,12 +83,11 @@ def __download__(sock, filename, address):
         x = "Header arrived"
         sock.sendto(x.encode(), addr)
         
-        # now i can receive the data from the server
         i = 0
         
         # list for all packets received from server
         packets = []
-       
+      
         while i < int(n_packet.decode()):
             try:
                 data, addr = sock.recvfrom(PACKET_SIZE_DOWNLOAD)    
@@ -101,25 +98,26 @@ def __download__(sock, filename, address):
                     i = 0
                     msg = "111"      
                     packets.clear()
-                    sock.sendto(msg, addr)
+                    sock.sendto(msg.encode(), addr)
                     continue 
                 i = i+1
                 # add the data received from server to the list
                 print("Put in the list packet")
                 packets.append(data_enc)
-            except Exception as error:
-                print(error)
+            except sk.error as err:
+                print(err)
                 i = 0
                 msg = "111"      # 111 : something went wrong
                 packets.clear()
                 sock.sendto(msg.encode(), addr)
-
+                
         # 200 : all packet arrived
         if len(packets) == int(n_packet.decode()):
             msg = "200"
             sock.sendto(msg.encode(), addr)
             packets.sort(key=lambda x: x.packet_number)
-            for packet in packets :     
+            
+            for packet in packets:     
                 f.write(packet.body)
             print ("%s finish!" % filename)
             break             
