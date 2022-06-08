@@ -36,48 +36,53 @@ def download(file_name, address):
     num_packets = len(file_packets)
     message = '%s'% num_packets
 
-    # Send header file
-    while True:
-        try: 
-            sock.sendto(message.encode(), address)
-            # Catch client response
-            response, addr = sock.recvfrom(4096)
-        except sk.error:
-            sock.sendto(message.encode(), address)
-            
-        if response.decode() == 'Header arrived':
-            break
-
-    # Start downloading 
-    print('Downloading...')
-    for packet in file_packets :
-        print("Send packet n. %s" % packet.packet_number)
-        time.sleep(0.0001)
-        a = pickle.dumps(packet)
-        sock.sendto(a, addr) 
-    sock.settimeout(5)
-    while True:
-        try:
-            response, addr = sock.recvfrom(4096)
-            response = response.decode()
-            # code 200 : Download Successful
-            if response == '200':
-                print('Download finished')
-                sock.settimeout(None)
-                return 
-            # code 111 : client ask packets again
-            elif response == '111':
-                for packet in file_packets :
-                    print("send packet again %s" % packet.packet_number) 
-                    sock.sendto(pickle.dumps(packet), addr)
-            else:
-                print('Download failed')
+    try:
+        sock.settimeout(5)
+        # Send header file
+        while True:
+            try: 
+                sock.sendto(message.encode(), address)
+                # Catch client response
+                response, addr = sock.recvfrom(4096)
+            except sk.error:
+                sock.sendto(message.encode(), address)
+                
+            if response.decode() == 'Header arrived':
+                break
+    
+        # Start downloading 
+        print('Downloading...')
+        for packet in file_packets :
+            print("Send packet n. %s" % packet.packet_number)
+            time.sleep(0.0001)
+            a = pickle.dumps(packet)
+            sock.sendto(a, addr) 
+        
+        while True:
+            try:
+                response, addr = sock.recvfrom(4096)
+                response = response.decode()
+                # code 200 : Download Successful
+                if response == '200':
+                    print('Download finished')
+                    sock.settimeout(None)
+                    return 
+                # code 111 : client ask packets again
+                elif response == '111':
+                    for packet in file_packets :
+                        print("send packet again %s" % packet.packet_number) 
+                        sock.sendto(pickle.dumps(packet), addr)
+                else:
+                    print('Download failed')
+                    sock.settimeout(None)
+                    return
+            except sk.error:
+                print('Download failed with exception')
                 sock.settimeout(None)
                 return
-        except sk.error:
-            print('Download failed with exception')
-            sock.settimeout(None)
-            return
+    except Exception as info:
+       print(info)
+       sock.sendto(message.encode(), server_address)
     
 # Upload files from client to server
 def upload(file_name):    
