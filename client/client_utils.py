@@ -102,7 +102,7 @@ def __download__(sock, filename, address):
                     continue 
                 i = i+1
                 # add the data received from server to the list
-                print("Put in the list packet")
+                print("Put in the list packet n. -> %s" %i);
                 packets.append(data_enc)
             except sk.error as err:
                 print(err)

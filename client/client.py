@@ -16,11 +16,9 @@ download_path = os.getcwd()+"\\Download\\"
 
 try:
     # send message to server
-    print ('sending %s' % message)
     sent = sock.sendto(message.encode(), server_address)
 
     # Wait server receive
-    print('waiting to receive from')
     data, server = sock.recvfrom(4096)
     response = data.decode('utf8')
     # Print server info
@@ -61,9 +59,6 @@ try:
                 client_utils.__download__(sock, filename, server_address)
             else:
                 break
-            
-
-        
 
 except Exception as info:
     print(info)
